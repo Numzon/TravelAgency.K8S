@@ -1,0 +1,64 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-srv
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+    - host: host.myown.com
+      http:
+        paths:
+          #user-service
+          - path: /api/auth
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service-clusterip-srv
+                port:
+                  number: 80
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service-clusterip-srv
+                port:
+                  number: 80
+          - path: /api/notification-types
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service-clusterip-srv
+                port:
+                  number: 80
+          #agency-service
+          - path: /api/travel-agencies
+            pathType: Prefix
+            backend:
+              service:
+                name: agency-service-clusterip-srv
+                port:
+                  number: 80
+          - path: /api/managers
+            pathType: Prefix
+            backend:
+              service:
+                name: agency-service-clusterip-srv
+                port:
+                  number: 80
+          #employee-service
+          - path: /api/employees
+            pathType: Prefix
+            backend:
+              service:
+                name: employee-service-clusterip-srv
+                port:
+                  number: 80
+          - path: /api/categories
+            pathType: Prefix
+            backend:
+              service:
+                name: employee-service-clusterip-srv
+                port:
+                  number: 80

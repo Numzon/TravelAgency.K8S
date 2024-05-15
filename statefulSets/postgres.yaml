@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: npgsql-srv
+  labels:
+    app: npgsql
+spec:
+  ports:
+    - name: npgsql
+      port: 5432
+  clusterIP: None
+  selector:
+    app: npgsql
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: npgsql
+spec:
+  serviceName: "npgsql-srv"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: npgsql
+  template:
+    metadata:
+      labels:
+        app: npgsql
+    spec:
+      containers:
+        - name: npgsql
+          image: postgres:latest
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: POSTGRES_PASSWORD
+            - name: REPLICATION_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: REPLICATION_USER
+            - name: REPLICATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: REPLICATION_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+  volumeClaimTemplates:
+    - metadata:
+        name: postgredb
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: retainstorage
+        resources:
+          requests:
+            storage: 1Gi
